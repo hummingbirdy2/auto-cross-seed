@@ -1,0 +1,28 @@
+#!/usr/bin/with-contenv bash
+# shellcheck shell=bash
+
+# Empty value randomized
+SCAN_ALL_MIN=${SCAN_ALL_MIN:-"$((0 + RANDOM % 59))"} 
+SCAN_WEEK_DAY=${SCAN_WEEK_DAY:-"$((0 + RANDOM % 6))"}
+
+echo "
+-------------------------------------
+ENVIRONMENTS
+-------------------------------------
+JACKETT_URL=${JACKETT_URL}
+JACKETT_KEY=********************************
+TRACKER_LIST=${TRACKER_LIST}
+SEARCH_DIR=${SEARCH_DIR}
+TORRENT_DIR=${TORRENT_DIR}
+IGNORE_PATTERN=${IGNORE_PATTERN}
+DELAY=${DELAY}
+HISTORY_DIR=${HISTORY_DIR}
+CONFIG_PATH=${CONFIG_PATH}
+AT_OUTPUT_DIR=${AT_OUTPUT_DIR}
+NOTIF_OPTION=${NOTIF_OPTION}
+NOTIF_CONFIG_PATH=${NOTIF_CONFIG_PATH}
+SCAN_ALL_HOUR=${SCAN_ALL_HOUR}
+SCAN_ALL_MIN=${SCAN_ALL_MIN}
+SCAN_WEEK_DAY=${SCAN_WEEK_DAY}
+-------------------------------------
+"

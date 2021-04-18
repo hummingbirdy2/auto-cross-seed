@@ -1,0 +1,40 @@
+#!/usr/bin/with-contenv bash
+# shellcheck shell=bash
+
+
+# Create the config structure
+mkdir '/config/apprise' \
+	'/config/autotorrent' \
+	'/config/cross-seed' \
+	2> /dev/null
+
+# Copy autotorrent configuration file example
+[[ ! -e /config/autotorrent/autotorrent.conf ]] && \
+	cp /defaults/autotorrent.conf /config/autotorrent/
+
+# Link to an outside SearchHistory.json for Cross-Seed-AutoDL
+rm /app/cross-seed/SearchHistory.json 2> /dev/null
+[[ ! -e /config/cross-seed/run-daily.sh ]] && \
+	touch /config/cross-seed/SearchHistory.json
+ln -s /config/cross-seed/SearchHistory.json /app/cross-seed/SearchHistory.json
+
+# Copy script of auto-cross-seed with docker container parameters (for weekly run)
+[[ ! -e /script/run.sh ]] && \
+	cp /defaults/run.sh /script/
+
+# Copy script of auto-cross-seed with docker container parameters (for daily run)
+[[ ! -e /script/run-daily.sh ]] && \
+	cp /defaults/run-daily.sh /script/
+
+# Copy script of auto-cross-seed without search functions (for manual run)
+[[ ! -e /script/run-no-search.sh ]] && \
+	cp /defaults/run-no-search.sh /script/
+
+# Permissions
+chown -R abc:abc \
+	/app \
+	/config \
+	/script
+chmod +x \
+	/app/auto-cross-seed.sh \
+	/script/*.sh

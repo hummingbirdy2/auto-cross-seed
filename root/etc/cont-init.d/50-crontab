@@ -1,0 +1,48 @@
+#!/usr/bin/with-contenv bash
+# shellcheck shell=bash
+
+echo
+
+# Select cron file for running auto-cross-seed
+if [[ ! -e /config/jobs.crontab ]]; then
+    # Limit values and make more human readable
+    SCAN_ALL_MIN=$((SCAN_ALL_MIN % 59));    min=$(printf "%02d" $SCAN_ALL_MIN)
+    SCAN_ALL_HOUR=$((SCAN_ALL_HOUR % 23));  hour=$(printf "%02d" $SCAN_ALL_HOUR)
+    shopt -s nocasematch
+    case "$SCAN_WEEK_DAY" in
+        0|Sun) day='Sunday';    otherDay='1-6';;
+        1|Mon) day='Monday';    otherDay='0,2-6';;
+        2|Tue) day='Tuesday';   otherDay='0-1,3-6';;
+        3|Wed) day='Wednesday'; otherDay='0-2,4-6';;
+        4|Thu) day='Thursday';  otherDay='0-3,5-6';;
+        5|Fri) day='Friday';    otherDay='0-4,6';;
+        6|Sat) day='Saturday';  otherDay='0-5';;
+        7|*) day='Sunday';  otherDay='1-6'; SCAN_WEEK_DAY=0 ;;
+    esac; shopt -u nocasematch
+
+    # Creation crontab jobs file
+    echo \
+"$SCAN_ALL_MIN $SCAN_ALL_HOUR * * $SCAN_WEEK_DAY /bin/bash /script/run.sh 2>&1
+$SCAN_ALL_MIN $SCAN_ALL_HOUR * * $otherDay /bin/bash /script/run-daily.sh 2>&1
+" > "/defaults/jobs.crontab"
+
+    # Set crontab jobs (with the default user)
+    crontab -u abc /defaults/jobs.crontab
+
+    # Warn user about scheduled job
+    echo "***** Default crontab job loaded *****"
+    echo "- Will run auto-cross-seed every week at ${hour}:${min} on ${day} for all files"
+    echo "- Will run auto-cross-seed all other days at ${hour}:${min} only for files younger than 24h"
+    echo "( Please create /config/jobs.crontab to have custom scheduled time for running auto-cross-seed )"
+else
+    # Set crontab jobs (with the default user)
+    crontab -u abc /config/jobs.crontab
+
+    # Warn user about loading his crontab file
+    echo "***** User crontab job loaded *****"
+fi
+
+echo
+
+# Remove default crontab jobs (with the root)
+crontab -r
